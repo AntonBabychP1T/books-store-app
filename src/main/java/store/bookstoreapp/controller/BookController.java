@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import store.bookstoreapp.dto.BookDto;
 import store.bookstoreapp.dto.CreateBookRequestDto;
+import store.bookstoreapp.search.BookSearchParameters;
 import store.bookstoreapp.service.BookService;
 
 @RequiredArgsConstructor
@@ -30,6 +31,11 @@ public class BookController {
     @GetMapping("/{id}")
     public BookDto getBookById(@PathVariable Long id) {
         return bookService.findBookById(id);
+    }
+
+    @GetMapping("/search")
+    public List<BookDto> search(BookSearchParameters searchParameters) {
+        return bookService.search(searchParameters);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
