@@ -34,7 +34,7 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
                 .toList();
         body.put("errors", errors);
 
-        return new ResponseEntity<>(body,status);
+        return new ResponseEntity<>(body, status);
     }
 
     private String getErrorMessage(ObjectError e) {
@@ -55,6 +55,18 @@ public class CustomExceptionHandler extends ResponseEntityExceptionHandler {
         body.put("error", "Entity not found");
         body.put("message", ex.getMessage());
         body.put("path", request.getDescription(false));
-        return new ResponseEntity<>(body,HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(body, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RegistrationException.class)
+    public ResponseEntity<Object> handleRegistration(
+            RegistrationException ex, WebRequest request) {
+        Map<String, Object> body = new LinkedHashMap<>();
+        body.put("timestamp", LocalDateTime.now());
+        body.put("status", HttpStatus.CONFLICT);
+        body.put("error", "Email is already in use!");
+        body.put("message", ex.getMessage());
+        body.put("path", request.getDescription(false));
+        return new ResponseEntity<>(body, HttpStatus.CONFLICT);
     }
 }

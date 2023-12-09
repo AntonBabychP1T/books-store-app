@@ -1,8 +1,8 @@
 package store.bookstoreapp.service;
 
 import java.util.List;
-import store.bookstoreapp.dto.BookDto;
-import store.bookstoreapp.dto.CreateBookRequestDto;
+import store.bookstoreapp.dto.book.BookDto;
+import store.bookstoreapp.dto.book.CreateBookRequestDto;
 import store.bookstoreapp.search.BookSearchParameters;
 
 public interface BookService {
