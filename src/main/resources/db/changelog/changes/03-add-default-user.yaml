@@ -1,0 +1,26 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-default-user
+      author: antonbabych
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "default@email.com"
+              - column:
+                  name: password
+                  value: "defaultPassword"
+              - column:
+                  name: first_name
+                  value: "Default"
+              - column:
+                  name: last_name
+                  value: "User"
+              - column:
+                  name: shipping_address
+                  value: "Default Address"
+              - column:
+                  name: is_deleted
+                  value: 0

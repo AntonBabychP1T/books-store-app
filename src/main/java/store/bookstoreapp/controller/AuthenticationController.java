@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import store.bookstoreapp.dto.user.UserRegistrationRequestDto;
 import store.bookstoreapp.dto.user.UserResponseDto;
-import store.bookstoreapp.exception.RegistrationException;
 import store.bookstoreapp.service.UserService;
 
 @RequiredArgsConstructor
@@ -17,10 +16,9 @@ import store.bookstoreapp.service.UserService;
 public class AuthenticationController {
     private final UserService userService;
 
-    @PostMapping
+    @PostMapping("register")
     public UserResponseDto register(
-            @RequestBody @Valid UserRegistrationRequestDto requestDto
-    ) throws RegistrationException {
+            @RequestBody @Valid UserRegistrationRequestDto requestDto) {
         return userService.register(requestDto);
     }
 }
