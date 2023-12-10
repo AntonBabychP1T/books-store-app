@@ -17,8 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import store.bookstoreapp.dto.BookDto;
-import store.bookstoreapp.dto.CreateBookRequestDto;
+import store.bookstoreapp.dto.book.BookDto;
+import store.bookstoreapp.dto.book.CreateBookRequestDto;
 import store.bookstoreapp.search.BookSearchParameters;
 import store.bookstoreapp.service.BookService;
 
