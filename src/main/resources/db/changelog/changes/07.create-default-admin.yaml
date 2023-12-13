@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: add-default-admin-user
+      author: antonbabych
+      changes:
+        - insert:
+            tableName: users
+            columns:
+              - column:
+                  name: email
+                  value: "admin@email.com"
+              - column:
+                  name: password
+                  value: "$2a$10$zU0IPQfrO8/2sWdbc31fwuf0eRSbS/qbQTXwfL41sNckwDFurwVS6"
+              - column:
+                  name: first_name
+                  value: "Admin"
+              - column:
+                  name: last_name
+                  value: "User"
+              - column:
+                  name: shipping_address
+                  value: "Admin Address"
+              - column:
+                  name: is_deleted
+                  value: 0
+  - changeSet:
+      id: add-admin-role-to-admin-user
+      author: antonbabych
+      changes:
+        - insert:
+            tableName: users_roles
+            columns:
+              - column:
+                  name: user_id
+                  value: 2
+              - column:
+                  name: role_id
+                  valueNumeric: 1
