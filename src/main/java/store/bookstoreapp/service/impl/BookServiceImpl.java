@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import store.bookstoreapp.dto.book.BookDto;
+import store.bookstoreapp.dto.book.BookDtoWithoutCategoryIds;
 import store.bookstoreapp.dto.book.CreateBookRequestDto;
 import store.bookstoreapp.exception.EntityNotFoundException;
 import store.bookstoreapp.mapper.BookMapper;
@@ -62,5 +63,11 @@ public class BookServiceImpl implements BookService {
         return bookRepository.findAll(bookSpecification,pageable).stream()
                 .map(bookMapper::toDto)
                 .toList();
+    }
+
+    @Override
+    public List<BookDtoWithoutCategoryIds> getBookByCategoryId(Long id, Pageable pageable) {
+        return bookRepository.findAllByCategoriesId(id,pageable).stream()
+                .map(bookMapper::toDtoWithoutCategories).toList();
     }
 }
