@@ -1,5 +1,7 @@
 package store.bookstoreapp.service.impl;
 
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import store.bookstoreapp.dto.cartitem.CartItemDto;
@@ -30,14 +32,15 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
 
     @Override
     public ShoppingCartDto addBookToShoppingCart(CartItemRequestDto requestDto, String email) {
-
         ShoppingCart shoppingCart = getShoppingCartByEmail(email);
-        CartItem cartItem =
+        Optional<CartItem> cartItemInShoppingCart =
                 findCartItemInShoppingCart(shoppingCart, requestDto.bookId());
-        if (cartItem == null) {
-            cartItem = createCartItem(requestDto, shoppingCart);
-        } else {
+        CartItem cartItem;
+        if (cartItemInShoppingCart.isPresent()) {
+            cartItem = cartItemInShoppingCart.get();
             cartItem.setQuantity(cartItem.getQuantity() + requestDto.quantity());
+        } else {
+            cartItem = createCartItem(requestDto, shoppingCart);
         }
         cartItemRepository.save(cartItem);
         shoppingCartRepository.save(shoppingCart);
@@ -61,10 +64,9 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         CartItem cartItem = shoppingCart.getCartItems().stream()
                 .filter(c -> c.getId().equals(id))
                 .findFirst()
-                .orElse(null);
-        if (cartItem == null) {
-            throw new EntityNotFoundException("Can't find cart item with id: " + id);
-        }
+                .orElseThrow(
+                        () -> new EntityNotFoundException("Can't find cart item with id: " + id)
+                );
         cartItem.setQuantity(quantity);
         return cartItemMapper.toDto(cartItemRepository.save(cartItem));
     }
@@ -86,10 +88,10 @@ public class ShoppingCartServiceImpl implements ShoppingCartService {
         return cartItem;
     }
 
-    private CartItem findCartItemInShoppingCart(ShoppingCart shoppingCart, Long id) {
+    private Optional<CartItem> findCartItemInShoppingCart(ShoppingCart shoppingCart, Long id) {
         return shoppingCart.getCartItems().stream()
                 .filter(cartItem -> cartItem.getBook().getId().equals(id))
-                .findFirst()
-                .orElse(null);
+                .findFirst();
+
     }
 }
