@@ -22,6 +22,9 @@ public interface BookMapper {
     @Mapping(target = "categories", ignore = true)
     Book toModel(CreateBookRequestDto bookRequestDto);
 
+    @Mapping(target = "categories", ignore = true)
+    Book toModel(BookDto bookDto);
+
     void updateBookFromDto(CreateBookRequestDto requestDto, @MappingTarget Book book);
 
     BookDtoWithoutCategoryIds toDtoWithoutCategories(Book book);
