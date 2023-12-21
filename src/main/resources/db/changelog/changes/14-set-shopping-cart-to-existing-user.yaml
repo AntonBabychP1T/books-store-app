@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1-add-shopping-cart-to-default-user
+      author: antonbabych
+      changes:
+        - insert:
+            tableName: shopping_cards
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 1
+              - column:
+                  name: is_deleted
+                  value: 0
+  - changeSet:
+      id: 2-add-shopping-cart-to-default-admin
+      author: antonbabych
+      changes:
+        - insert:
+            tableName: shopping_cards
+            columns:
+              - column:
+                  name: user_id
+                  valueNumeric: 2
+              - column:
+                  name: is_deleted
+                  value: 0
