@@ -23,6 +23,7 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
 import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -77,6 +78,10 @@ public class CategoryControllerTest {
 
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
+    @Sql(
+            scripts = "classpath:database/categories/delete-default-category.sql",
+            executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD
+    )
     @DisplayName("Create a new category")
     public void createCategory_ValidCategory_ReturnCategoryDto() throws Exception {
         CategoryRequestDto requestDto = new CategoryRequestDto();
@@ -89,7 +94,7 @@ public class CategoryControllerTest {
                         .content(jsonRequest)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn();
         CategoryDto actual = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
@@ -130,7 +135,7 @@ public class CategoryControllerTest {
     public void getCategoryById_ValidId_ReturnCategoryDto() throws Exception {
         CategoryDto expected = new CategoryDto(1L, "First name", "Description");
 
-        MvcResult result = mockMvc.perform(get("/api/category/{id}", 1L)
+        MvcResult result = mockMvc.perform(get("/api/categories/{id}", 1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
