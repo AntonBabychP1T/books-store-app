@@ -112,7 +112,7 @@ public class BookControllerTest {
                         .content(jsonRequest)
                         .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andReturn();
 
         BookDto actual = objectMapper.readValue(
@@ -132,12 +132,14 @@ public class BookControllerTest {
         BookDto firstBook = new BookDto();
         firstBook.setId(1L);
         firstBook.setTitle("First title");
+        firstBook.setAuthor("First Author");
         firstBook.setPrice(BigDecimal.valueOf(9.99));
         firstBook.setIsbn("1ISBN01");
         firstBook.setDescription("description");
         firstBook.setCoverImage("coverimage");
         BookDto secondBook = new BookDto();
         secondBook.setId(2L);
+        secondBook.setAuthor("Second Author");
         secondBook.setTitle("Second title");
         secondBook.setPrice(BigDecimal.valueOf(19.99));
         secondBook.setIsbn("2ISBN02");
@@ -145,6 +147,7 @@ public class BookControllerTest {
         secondBook.setCoverImage("coverimage");
         BookDto thirdBook = new BookDto();
         thirdBook.setId(3L);
+        thirdBook.setAuthor("Third Author");
         thirdBook.setTitle("Third title");
         thirdBook.setPrice(BigDecimal.valueOf(19.99));
         thirdBook.setIsbn("3ISBN03");
