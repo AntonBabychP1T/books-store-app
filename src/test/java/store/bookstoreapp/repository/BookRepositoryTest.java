@@ -3,6 +3,7 @@ package store.bookstoreapp.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ public class BookRepositoryTest {
         book.setIsbn("ValidISBN");
         book.setDescription("description");
         book.setCoverImage("coverimage");
+        book.setCategories(Collections.emptySet());
         Book bookById = bookRepository.findBookById(4L).get();
 
         assertThat(bookById).isEqualTo(book);

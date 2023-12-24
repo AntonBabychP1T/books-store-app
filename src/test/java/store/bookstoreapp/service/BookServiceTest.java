@@ -1,8 +1,8 @@
 package store.bookstoreapp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -36,14 +37,9 @@ import store.bookstoreapp.service.impl.BookServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 public class BookServiceTest {
+    private static final Long INVALID_ID = 100L;
     private static final Long VALID_ID = 1L;
-    private static final Long NOT_VALID_ID = 100L;
-    private static final String VALID_TITLE = "Valid Title";
-    private static final String VALID_AUTHOR = "Valid Author";
-    private static final String VALID_ISBN = "ValidISNB";
     private static final BigDecimal VALID_PRICE = BigDecimal.valueOf(9.99);
-    private static final String VALID_DESCRIPTION = "Valid description";
-    private static final String VALID_COVER_IMAGE = "Valid cover image";
 
     @InjectMocks
     private BookServiceImpl bookService;
@@ -53,218 +49,143 @@ public class BookServiceTest {
 
     @Mock
     private BookMapper bookMapper;
+
     @Mock
     private BookSpecificationBuilder bookSpecificationBuilder;
 
-    @Test
-    @DisplayName("Verify save() method works")
-    public void save_ValidCreateBookRequestDto_ReturnBookDto() {
-        //Given
-        CreateBookRequestDto requestDto = new CreateBookRequestDto();
-        requestDto.setAuthor(VALID_AUTHOR);
-        requestDto.setTitle(VALID_TITLE);
-        requestDto.setPrice(VALID_PRICE);
-        requestDto.setIsbn(VALID_ISBN);
-        requestDto.setDescription(VALID_DESCRIPTION);
-        requestDto.setCoverImage(VALID_COVER_IMAGE);
+    private Book validBook;
+    private BookDto validBookDto;
+    private CreateBookRequestDto validCreateBookRequestDto;
 
+    @BeforeEach
+    void setUp() {
+        validBook = createValidBook();
+        validBookDto = createValidBookDto();
+        validCreateBookRequestDto = createValidCreateBookRequestDto();
+    }
+
+    private Book createValidBook() {
         Book book = new Book();
-        book.setAuthor(requestDto.getAuthor());
-        book.setTitle(requestDto.getTitle());
-        book.setPrice(requestDto.getPrice());
-        book.setIsbn(requestDto.getIsbn());
-        book.setDescription(requestDto.getDescription());
-        book.setCoverImage(requestDto.getCoverImage());
+        book.setId(VALID_ID);
+        book.setAuthor("Valid Author");
+        book.setTitle("Valid Title");
+        book.setPrice(VALID_PRICE);
+        book.setIsbn("ValidISNB");
+        book.setDescription("Valid description");
+        book.setCoverImage("Valid cover image");
+        return book;
+    }
 
+    private BookDto createValidBookDto() {
         BookDto bookDto = new BookDto();
-        bookDto.setAuthor(book.getAuthor());
-        bookDto.setIsbn(book.getIsbn());
-        bookDto.setId(VALID_ID);
-        bookDto.setPrice(book.getPrice());
-        bookDto.setTitle(book.getTitle());
-        bookDto.setCoverImage(book.getCoverImage());
-        bookDto.setDescription(book.getDescription());
-        when(bookMapper.toModel(requestDto)).thenReturn(book);
-        when(bookRepository.save(book)).thenReturn(book);
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
+        bookDto.setAuthor(validBook.getAuthor());
+        bookDto.setId(validBook.getId());
+        bookDto.setIsbn(validBook.getIsbn());
+        bookDto.setTitle(validBook.getTitle());
+        bookDto.setCoverImage(validBook.getCoverImage());
+        bookDto.setDescription(validBook.getDescription());
+        return bookDto;
+    }
 
-        //when
-        BookDto savedBook = bookService.save(requestDto);
-
-        //then
-        assertThat(savedBook).isEqualTo(bookDto);
+    private CreateBookRequestDto createValidCreateBookRequestDto() {
+        CreateBookRequestDto requestDto = new CreateBookRequestDto();
+        requestDto.setAuthor(validBook.getAuthor());
+        requestDto.setTitle(validBook.getTitle());
+        requestDto.setPrice(validBook.getPrice());
+        requestDto.setIsbn(validBook.getIsbn());
+        requestDto.setDescription(validBook.getDescription());
+        requestDto.setCoverImage(validBook.getCoverImage());
+        return requestDto;
     }
 
     @Test
-    @DisplayName("Verify findAll() method works")
-    public void findAll_ValidPageable_ReturnsAllBooks() {
-        //given
-        Book book = new Book();
-        book.setId(VALID_ID);
-        book.setAuthor(VALID_AUTHOR);
-        book.setTitle(VALID_TITLE);
-        book.setPrice(VALID_PRICE);
-        book.setIsbn(VALID_ISBN);
-        book.setDescription(VALID_DESCRIPTION);
-        book.setCoverImage(VALID_COVER_IMAGE);
+    @DisplayName("save() should return BookDto for valid request")
+    public void save_WithValidRequest_ShouldReturnBookDto() {
+        when(bookMapper.toModel(validCreateBookRequestDto)).thenReturn(validBook);
+        when(bookRepository.save(validBook)).thenReturn(validBook);
+        when(bookMapper.toDto(validBook)).thenReturn(validBookDto);
 
-        BookDto bookDto = new BookDto();
-        bookDto.setAuthor(book.getAuthor());
-        bookDto.setId(book.getId());
-        bookDto.setIsbn(book.getIsbn());
-        bookDto.setTitle(book.getTitle());
-        bookDto.setCoverImage(book.getCoverImage());
-        bookDto.setDescription(book.getDescription());
+        BookDto savedBook = bookService.save(validCreateBookRequestDto);
 
+        assertThat(savedBook).isEqualTo(validBookDto);
+    }
+
+    @Test
+    @DisplayName("findAll() should return all books")
+    public void findAll_WithValidPageable_ShouldReturnAllBooks() {
         Pageable pageable = PageRequest.of(0, 10);
-        List<Book> books = List.of(book);
+        List<Book> books = List.of(validBook);
         Page<Book> bookPage = new PageImpl<>(books, pageable, books.size());
-
         when(bookRepository.findAll(pageable)).thenReturn(bookPage);
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
+        when(bookMapper.toDto(validBook)).thenReturn(validBookDto);
 
-        //when
         List<BookDto> bookDtos = bookService.findAll(pageable);
 
-        //then
-
         assertThat(bookDtos).hasSize(1);
-        assertThat(bookDtos.get(0)).isEqualTo(bookDto);
-
+        assertThat(bookDtos.get(0)).isEqualTo(validBookDto);
     }
 
     @Test
-    @DisplayName("Verify findBookById() method works")
-    public void findBookById_ValidId_ReturnBookDto() {
-        Book book = new Book();
-        book.setId(VALID_ID);
-        book.setAuthor(VALID_AUTHOR);
-        book.setTitle(VALID_TITLE);
-        book.setPrice(VALID_PRICE);
-        book.setIsbn(VALID_ISBN);
-        book.setDescription(VALID_DESCRIPTION);
-        book.setCoverImage(VALID_COVER_IMAGE);
+    @DisplayName("findBookById() should return BookDto for valid ID")
+    public void findBookById_WithValidId_ShouldReturnBookDto() {
+        when(bookRepository.findBookById(VALID_ID)).thenReturn(Optional.of(validBook));
+        when(bookMapper.toDto(validBook)).thenReturn(validBookDto);
 
-        BookDto bookDto = new BookDto();
-        bookDto.setAuthor(book.getAuthor());
-        bookDto.setId(book.getId());
-        bookDto.setIsbn(book.getIsbn());
-        bookDto.setTitle(book.getTitle());
-        bookDto.setCoverImage(book.getCoverImage());
-        bookDto.setDescription(book.getDescription());
-
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
-        when(bookRepository.findBookById(VALID_ID)).thenReturn(Optional.of(book));
-
-        //when
         BookDto bookById = bookService.findBookById(VALID_ID);
 
-        //then
-        assertThat(bookById).isEqualTo(bookDto);
+        assertThat(bookById).isEqualTo(validBookDto);
     }
 
     @Test
-    @DisplayName("Verify findBookById() method works")
-    public void findBookById_notValidId_ThrowException() {
-        //given
-        when(bookRepository.findBookById(NOT_VALID_ID)).thenReturn(Optional.empty());
+    @DisplayName("findBookById() should throw EntityNotFoundException for invalid ID")
+    public void findBookById_WithInvalidId_ShouldThrowException() {
+        when(bookRepository.findBookById(INVALID_ID)).thenReturn(Optional.empty());
 
-        //when
-        RuntimeException exception = assertThrows(EntityNotFoundException.class,
-                () -> bookService.findBookById(NOT_VALID_ID));
-        //then
-        String expectedMessage = "Can't find book with id: " + NOT_VALID_ID;
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> bookService.findBookById(INVALID_ID)
+        );
+
+        assertEquals("Can't find book with id: " + INVALID_ID, exception.getMessage());
     }
 
     @Test
-    @DisplayName("Verify updateBook() method works")
-    public void updateBook_ValidIdAndCreateBookRequestDto_ReturnBookDto() {
-        CreateBookRequestDto requestDto = new CreateBookRequestDto();
-        requestDto.setAuthor(VALID_AUTHOR);
-        requestDto.setTitle(VALID_TITLE);
-        requestDto.setPrice(VALID_PRICE);
-        requestDto.setIsbn(VALID_ISBN);
-        requestDto.setDescription(VALID_DESCRIPTION);
-        requestDto.setCoverImage(VALID_COVER_IMAGE);
+    @DisplayName("updateBook() should return updated BookDto for valid ID")
+    public void updateBook_WithValidIdAndCreateBookRequestDto_ShouldReturnUpdatedBookDto() {
+        when(bookRepository.findBookById(VALID_ID)).thenReturn(Optional.of(validBook));
+        when(bookRepository.save(validBook)).thenReturn(validBook);
+        when(bookMapper.toDto(validBook)).thenReturn(validBookDto);
 
-        Book bookToUpdate = new Book();
-        bookToUpdate.setAuthor(requestDto.getAuthor());
-        bookToUpdate.setTitle("New Valid Title");
-        bookToUpdate.setPrice(requestDto.getPrice());
-        bookToUpdate.setIsbn(requestDto.getIsbn());
-        bookToUpdate.setDescription(requestDto.getDescription());
-        bookToUpdate.setCoverImage(requestDto.getCoverImage());
+        BookDto updatedBook = bookService.updateBook(VALID_ID, validCreateBookRequestDto);
 
-        BookDto bookDto = new BookDto();
-        bookDto.setAuthor(bookToUpdate.getAuthor());
-        bookDto.setId(bookToUpdate.getId());
-        bookDto.setIsbn(bookToUpdate.getIsbn());
-        bookDto.setTitle(bookToUpdate.getTitle());
-        bookDto.setCoverImage(bookToUpdate.getCoverImage());
-        bookDto.setDescription(bookToUpdate.getDescription());
-
-        when(bookRepository.findBookById(VALID_ID)).thenReturn(Optional.of(bookToUpdate));
-        when(bookRepository.save(bookToUpdate)).thenReturn(bookToUpdate);
-        when(bookMapper.toDto(bookToUpdate)).thenReturn(bookDto);
-
-        //when
-        BookDto updatedBook = bookService.updateBook(VALID_ID, requestDto);
-
-        //then
-        verify(bookMapper).updateBookFromDto(requestDto, bookToUpdate);
-        assertThat(updatedBook).isEqualTo(bookDto);
+        verify(bookMapper).updateBookFromDto(validCreateBookRequestDto, validBook);
+        assertThat(updatedBook).isEqualTo(validBookDto);
     }
 
     @Test
-    @DisplayName("Verify updateBook() method works")
-    public void updateBook_notValidId_ThrowException() {
-        CreateBookRequestDto requestDto = new CreateBookRequestDto();
-        requestDto.setAuthor(VALID_AUTHOR);
-        requestDto.setTitle(VALID_TITLE);
-        requestDto.setPrice(VALID_PRICE);
-        requestDto.setIsbn(VALID_ISBN);
-        requestDto.setDescription(VALID_DESCRIPTION);
-        requestDto.setCoverImage(VALID_COVER_IMAGE);
-        //given
-        when(bookRepository.findBookById(NOT_VALID_ID)).thenReturn(Optional.empty());
+    @DisplayName("updateBook() should throw EntityNotFoundException for invalid ID")
+    public void updateBook_WithInvalidId_ShouldThrowException() {
+        when(bookRepository.findBookById(INVALID_ID)).thenReturn(Optional.empty());
 
-        //when
-        Exception exception = assertThrows(EntityNotFoundException.class,
-                () -> bookService.updateBook(NOT_VALID_ID, requestDto));
-        //then
-        String expectedMessage = "Can't find book with id: " + NOT_VALID_ID;
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
+        EntityNotFoundException exception = assertThrows(
+                EntityNotFoundException.class,
+                () -> bookService.updateBook(INVALID_ID, validCreateBookRequestDto)
+        );
+
+        assertEquals("Can't find book with id: " + INVALID_ID, exception.getMessage());
     }
 
     @Test
-    @DisplayName("Verify deleteById method works")
-    public void deleteById_ValidId_NoValue() {
+    @DisplayName("deleteById() should invoke repository deletion for valid ID")
+    public void deleteById_WithValidId_ShouldInvokeDeletion() {
         bookService.deleteById(VALID_ID);
+
         verify(bookRepository).deleteById(VALID_ID);
     }
 
     @Test
-    @DisplayName("Verify search method works ")
-    public void search_ValidBookSearchParameters_BooksDtosList() {
-        Book book = new Book();
-        book.setId(VALID_ID);
-        book.setAuthor(VALID_AUTHOR);
-        book.setTitle(VALID_TITLE);
-        book.setPrice(VALID_PRICE);
-        book.setIsbn(VALID_ISBN);
-        book.setDescription(VALID_DESCRIPTION);
-        book.setCoverImage(VALID_COVER_IMAGE);
-
-        BookDto bookDto = new BookDto();
-        bookDto.setAuthor(book.getAuthor());
-        bookDto.setId(book.getId());
-        bookDto.setIsbn(book.getIsbn());
-        bookDto.setTitle(book.getTitle());
-        bookDto.setCoverImage(book.getCoverImage());
-        bookDto.setDescription(book.getDescription());
+    @DisplayName("search should return a list of BookDtos based on valid search parameters")
+    public void search_WithValidBookSearchParameters_ShouldReturnBooksDtosList() {
         BookSearchParameters searchParameters = new BookSearchParameters(
                 new String[]{"Valid Title"},
                 new String[]{"Valid Author"},
@@ -272,51 +193,48 @@ public class BookServiceTest {
         );
         Pageable pageable = PageRequest.of(0, 10);
         Specification<Book> bookSpecification = mock(Specification.class);
+
         when(bookSpecificationBuilder.build(searchParameters)).thenReturn(bookSpecification);
-        List<Book> books = List.of(book);
-        List<BookDto> bookDtos = List.of(bookDto);
-        when(bookMapper.toDto(book)).thenReturn(bookDto);
-        when(bookRepository.findAll(bookSpecification, pageable)).thenReturn(new PageImpl<>(books));
+        when(bookRepository.findAll(bookSpecification, pageable))
+                .thenReturn(new PageImpl<>(List.of(validBook)));
+        when(bookMapper.toDto(validBook)).thenReturn(validBookDto);
 
         List<BookDto> resultsDtos = bookService.search(searchParameters, pageable);
-        assertThat(resultsDtos).isEqualTo(bookDtos);
+
+        assertThat(resultsDtos).containsExactly(validBookDto);
     }
 
     @Test
-    @DisplayName("Verify getBookByCategoryId() method works")
-    public void getBookByCategoryId_ValidIdAndValidPageable_BookDtosWithoutIds() {
+    @DisplayName("getBookByCategoryId should return a list of BookDtosWithoutCategoryIds "
+            + "for valid ID and pageable")
+    public void getBookByCategoryId_WithValidIdAndValidPageable_ShouldReturnBookDtosWithoutIds() {
         Long categoryId = 1L;
         Category category = new Category();
+        category.setId(categoryId);
         category.setName("New Category");
         category.setDescription("New description");
-        category.setId(categoryId);
-        Book book = new Book();
-        book.setId(VALID_ID);
-        book.setAuthor(VALID_AUTHOR);
-        book.setTitle(VALID_TITLE);
-        book.setPrice(VALID_PRICE);
-        book.setIsbn(VALID_ISBN);
-        book.setDescription(VALID_DESCRIPTION);
-        book.setCoverImage(VALID_COVER_IMAGE);
-        book.setCategories(Set.of(category));
-        BookDtoWithoutCategoryIds bookDtoWithoutCategoryIds = new BookDtoWithoutCategoryIds();
-        bookDtoWithoutCategoryIds.setAuthor(book.getAuthor());
-        bookDtoWithoutCategoryIds.setIsbn(book.getIsbn());
-        bookDtoWithoutCategoryIds.setCoverImage(book.getCoverImage());
-        bookDtoWithoutCategoryIds.setPrice(book.getPrice());
-        bookDtoWithoutCategoryIds.setDescription(book.getDescription());
+        validBook.setCategories(Set.of(category));
+        BookDtoWithoutCategoryIds bookDtoWithoutCategoryIds
+                = createBookDtoWithoutCategoryIds(validBook);
         Pageable pageable = PageRequest.of(0, 10);
-        List<Book> books = List.of(book);
-        List<BookDtoWithoutCategoryIds> booksDtoWithoutCategoryIds =
-                List.of(bookDtoWithoutCategoryIds);
+        when(bookRepository.findAllByCategoriesId(categoryId, pageable))
+                .thenReturn(List.of(validBook));
+        when(bookMapper.toDtoWithoutCategories(validBook))
+                .thenReturn(bookDtoWithoutCategoryIds);
 
-        when(bookRepository.findAllByCategoriesId(categoryId, pageable)).thenReturn(books);
-        when(bookMapper.toDtoWithoutCategories(book)).thenReturn(bookDtoWithoutCategoryIds);
+        List<BookDtoWithoutCategoryIds> bookByCategoryId
+                = bookService.getBookByCategoryId(categoryId, pageable);
 
-        List<BookDtoWithoutCategoryIds> bookByCategoryId = bookService
-                .getBookByCategoryId(categoryId, pageable);
+        assertThat(bookByCategoryId).containsExactly(bookDtoWithoutCategoryIds);
+    }
 
-        assertThat(bookByCategoryId).isEqualTo(booksDtoWithoutCategoryIds);
+    private BookDtoWithoutCategoryIds createBookDtoWithoutCategoryIds(Book book) {
+        BookDtoWithoutCategoryIds dto = new BookDtoWithoutCategoryIds();
+        dto.setAuthor(book.getAuthor());
+        dto.setIsbn(book.getIsbn());
+        dto.setCoverImage(book.getCoverImage());
+        dto.setPrice(book.getPrice());
+        dto.setDescription(book.getDescription());
+        return dto;
     }
 }
-

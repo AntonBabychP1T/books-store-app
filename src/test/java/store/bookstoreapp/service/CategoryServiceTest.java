@@ -1,13 +1,14 @@
 package store.bookstoreapp.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -32,148 +33,134 @@ public class CategoryServiceTest {
     private static final String VALID_NAME = "Valid name";
     private static final String VALID_DESCRIPTION = "Valid description";
     private static final Long VALID_ID = 1L;
-    private static final Long NOT_VALID_ID = 100L;
+    private static final Long INVALID_ID = 100L;
 
     @InjectMocks
     private CategoryServiceImpl categoryService;
+
     @Mock
     private CategoryMapper categoryMapper;
+
     @Mock
     private CategoryRepository categoryRepository;
 
-    @Test
-    @DisplayName("Verify save() method works")
-    public void save_ValidCategoryRequestDto_ReturnCategoryDto() {
-        CategoryRequestDto categoryRequestDto = new CategoryRequestDto();
-        categoryRequestDto.setName(VALID_NAME);
-        categoryRequestDto.setDescription(VALID_DESCRIPTION);
+    private Category validCategory;
+    private CategoryDto validCategoryDto;
+    private CategoryRequestDto validCategoryRequestDto;
+
+    @BeforeEach
+    void setUp() {
+        validCategory = createValidCategory();
+        validCategoryDto = createValidCategoryDto(validCategory);
+        validCategoryRequestDto = createValidCategoryRequestDto();
+    }
+
+    private Category createValidCategory() {
         Category category = new Category();
-        category.setName(categoryRequestDto.getName());
-        category.setDescription(categoryRequestDto.getDescription());
         category.setId(VALID_ID);
-        CategoryDto categoryDto = new CategoryDto(
-                category.getId(),
-                category.getName(),
-                category.getDescription()
-        );
-        when(categoryMapper.toModel(categoryRequestDto)).thenReturn(category);
-        when(categoryRepository.save(category)).thenReturn(category);
-        when(categoryMapper.toDto(category)).thenReturn(categoryDto);
+        category.setName(VALID_NAME);
+        category.setDescription(VALID_DESCRIPTION);
+        return category;
+    }
 
-        CategoryDto savedCategory = categoryService.save(categoryRequestDto);
+    private CategoryDto createValidCategoryDto(Category category) {
+        return new CategoryDto(category.getId(), category.getName(), category.getDescription());
+    }
 
-        assertThat(savedCategory).isEqualTo(categoryDto);
+    private CategoryRequestDto createValidCategoryRequestDto() {
+        CategoryRequestDto dto = new CategoryRequestDto();
+        dto.setName(VALID_NAME);
+        dto.setDescription(VALID_DESCRIPTION);
+        return dto;
     }
 
     @Test
-    @DisplayName("Verify findAll() method works")
-    public void findAll_ValidPageable_ReturnAllCategories() {
-        Category category = new Category();
-        category.setName(VALID_NAME);
-        category.setDescription(VALID_DESCRIPTION);
-        category.setId(VALID_ID);
+    @DisplayName("save() should return CategoryDto for valid request")
+    public void save_WithValidCategoryRequestDto_ShouldReturnCategoryDto() {
+        when(categoryMapper.toModel(validCategoryRequestDto)).thenReturn(validCategory);
+        when(categoryRepository.save(validCategory)).thenReturn(validCategory);
+        when(categoryMapper.toDto(validCategory)).thenReturn(validCategoryDto);
 
-        CategoryDto categoryDto = new CategoryDto(
-                category.getId(),
-                category.getName(),
-                category.getDescription()
-        );
+        CategoryDto savedCategory = categoryService.save(validCategoryRequestDto);
 
+        assertThat(savedCategory).isEqualTo(validCategoryDto);
+    }
+
+    @Test
+    @DisplayName("findAll() should return all categories")
+    public void findAll_WithValidPageable_ShouldReturnAllCategories() {
         Pageable pageable = PageRequest.of(0, 10);
-        List<Category> categories = List.of(category);
-        Page<Category> categoryPage = new PageImpl<>(categories, pageable, categories.size());
+        Page<Category> categoryPage = new PageImpl<>(List.of(validCategory), pageable, 1);
         when(categoryRepository.findAll(pageable)).thenReturn(categoryPage);
-        when(categoryMapper.toDto(category)).thenReturn(categoryDto);
+        when(categoryMapper.toDto(validCategory)).thenReturn(validCategoryDto);
 
         List<CategoryDto> categoryDtos = categoryService.findAll(pageable);
 
         assertThat(categoryDtos).hasSize(1);
-        assertThat(categoryDtos.get(0)).isEqualTo(categoryDto);
+        assertThat(categoryDtos.get(0)).isEqualTo(validCategoryDto);
     }
 
     @Test
-    @DisplayName("Verify deleteById method works")
-    public void delete_ValidId_NotValueInList() {
+    @DisplayName("delete() should remove category with valid ID")
+    public void delete_WithValidId_ShouldRemoveCategory() {
         categoryService.delete(VALID_ID);
+
         verify(categoryRepository).deleteById(VALID_ID);
     }
 
     @Test
-    @DisplayName("Verify cetById() method works")
-    public void getById_ValidId_ReturnCategoryDto() {
-        Category category = new Category();
-        category.setName(VALID_NAME);
-        category.setDescription(VALID_DESCRIPTION);
-        category.setId(VALID_ID);
-
-        CategoryDto categoryDto = new CategoryDto(
-                category.getId(),
-                category.getName(),
-                category.getDescription()
-        );
-
-        when(categoryMapper.toDto(category)).thenReturn(categoryDto);
-        when(categoryRepository.findById(VALID_ID)).thenReturn(Optional.of(category));
+    @DisplayName("getById() should return CategoryDto for valid ID")
+    public void getById_WithValidId_ShouldReturnCategoryDto() {
+        when(categoryRepository.findById(VALID_ID)).thenReturn(Optional.of(validCategory));
+        when(categoryMapper.toDto(validCategory)).thenReturn(validCategoryDto);
 
         CategoryDto categoryById = categoryService.getById(VALID_ID);
 
-        assertThat(categoryById).isEqualTo(categoryDto);
-
+        assertThat(categoryById).isEqualTo(validCategoryDto);
     }
 
     @Test
-    @DisplayName("Verify findBookById() method works")
-    public void getById_NotValidId_ThrowException() {
-        when(categoryRepository.findById(NOT_VALID_ID)).thenReturn(Optional.empty());
+    @DisplayName("getById() should throw EntityNotFoundException for invalid ID")
+    public void getById_WithInvalidId_ShouldThrowException() {
+        when(categoryRepository.findById(INVALID_ID)).thenReturn(Optional.empty());
 
-        RuntimeException exception = assertThrows(EntityNotFoundException.class,
-                () -> categoryService.getById(NOT_VALID_ID));
-
-        String expectedMessage = "Can't find category with id " + NOT_VALID_ID;
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
-
-    }
-
-    @Test
-    @DisplayName("Verify update() method works")
-    public void update_ValidIdAndCategoryDto_ReturnCategoryDto() {
-        CategoryRequestDto categoryRequestDto = new CategoryRequestDto();
-        categoryRequestDto.setName(VALID_NAME);
-        categoryRequestDto.setDescription(VALID_DESCRIPTION);
-        Category category = new Category();
-        category.setName("New Valid Name");
-        category.setDescription(categoryRequestDto.getDescription());
-        category.setId(VALID_ID);
-        CategoryDto categoryDto = new CategoryDto(
-                category.getId(),
-                category.getName(),
-                category.getDescription()
+        EntityNotFoundException exception = Assertions.assertThrows(
+                EntityNotFoundException.class,
+                () -> categoryService.getById(INVALID_ID)
         );
-        when(categoryRepository.findById(VALID_ID)).thenReturn(Optional.of(category));
-        when(categoryRepository.save(category)).thenReturn(category);
-        when(categoryMapper.toDto(category)).thenReturn(categoryDto);
 
-        CategoryDto updateCategory = categoryService.update(VALID_ID, categoryRequestDto);
-
-        verify(categoryMapper).updateCategoryFromDto(categoryRequestDto, category);
-        assertThat(updateCategory).isEqualTo(categoryDto);
+        Assertions.assertEquals("Can't find category with id "
+                + INVALID_ID, exception.getMessage());
     }
 
     @Test
-    @DisplayName("Verify update() method works")
-    public void update_NotValidId_ThrowException() {
-        CategoryRequestDto categoryRequestDto = new CategoryRequestDto();
-        categoryRequestDto.setName(VALID_NAME);
-        categoryRequestDto.setDescription(VALID_DESCRIPTION);
+    @DisplayName("update() should return updated CategoryDto for valid ID")
+    public void update_WithValidIdAndCategoryDto_ShouldReturnUpdatedCategoryDto() {
+        Category updatedCategory = createValidCategory();
+        updatedCategory.setName("New Valid Name");
 
-        when(categoryRepository.findById(NOT_VALID_ID)).thenReturn(Optional.empty());
+        when(categoryRepository.findById(VALID_ID)).thenReturn(Optional.of(validCategory));
+        when(categoryRepository.save(any(Category.class))).thenReturn(updatedCategory);
+        when(categoryMapper.toDto(updatedCategory))
+                .thenReturn(createValidCategoryDto(updatedCategory));
 
-        RuntimeException exception = assertThrows(EntityNotFoundException.class,
-                () -> categoryService.update(NOT_VALID_ID, categoryRequestDto));
+        CategoryDto updatedCategoryDto = categoryService.update(VALID_ID, validCategoryRequestDto);
 
-        String expectedMessage = "Can't find category with id " + NOT_VALID_ID;
-        String actualMessage = exception.getMessage();
-        assertTrue(actualMessage.contains(expectedMessage));
+        verify(categoryMapper).updateCategoryFromDto(validCategoryRequestDto, validCategory);
+        assertThat(updatedCategoryDto).isEqualTo(createValidCategoryDto(updatedCategory));
+    }
+
+    @Test
+    @DisplayName("update() should throw EntityNotFoundException for invalid ID")
+    public void update_WithInvalidId_ShouldThrowException() {
+        when(categoryRepository.findById(INVALID_ID)).thenReturn(Optional.empty());
+
+        EntityNotFoundException exception = Assertions.assertThrows(
+                EntityNotFoundException.class,
+                () -> categoryService.update(INVALID_ID, validCategoryRequestDto)
+        );
+
+        Assertions.assertEquals("Can't find category with id "
+                + INVALID_ID, exception.getMessage());
     }
 }

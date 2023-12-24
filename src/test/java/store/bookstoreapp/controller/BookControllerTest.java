@@ -12,6 +12,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.AfterAll;
@@ -37,7 +38,6 @@ import store.bookstoreapp.dto.book.CreateBookRequestDto;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BookControllerTest {
-
     private static final String VALID_TITLE = "Valid Title";
     private static final String VALID_AUTHOR = "Valid Author";
     private static final String VALID_ISBN = "ValidISNB";
@@ -46,7 +46,6 @@ public class BookControllerTest {
     private static final String VALID_COVER_IMAGE = "Valid cover image";
 
     private static MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
 
@@ -84,6 +83,26 @@ public class BookControllerTest {
         }
     }
 
+    private BookDto createBookDto(
+            Long id,
+            String title,
+            String author,
+            BigDecimal price,
+            String isbn,
+            String description,
+            String coverImage
+    ) {
+        BookDto bookDto = new BookDto();
+        bookDto.setId(id);
+        bookDto.setTitle(title);
+        bookDto.setAuthor(author);
+        bookDto.setPrice(price);
+        bookDto.setIsbn(isbn);
+        bookDto.setDescription(description);
+        bookDto.setCoverImage(coverImage);
+        return bookDto;
+    }
+
     @WithMockUser(username = "admin", roles = {"ADMIN"})
     @Test
     @Sql(
@@ -92,6 +111,7 @@ public class BookControllerTest {
     )
     @DisplayName("Create a new book")
     public void createBook_ValidRequestDto_ReturnBookDto() throws Exception {
+        Long bookId = 1L;
         CreateBookRequestDto requestDto = new CreateBookRequestDto();
         requestDto.setAuthor(VALID_AUTHOR);
         requestDto.setTitle(VALID_TITLE);
@@ -99,13 +119,15 @@ public class BookControllerTest {
         requestDto.setIsbn(VALID_ISBN);
         requestDto.setDescription(VALID_DESCRIPTION);
         requestDto.setCoverImage(VALID_COVER_IMAGE);
-
-        BookDto expected = new BookDto();
-        expected.setTitle(requestDto.getTitle());
-        expected.setAuthor(requestDto.getAuthor());
-        expected.setPrice(requestDto.getPrice());
-        expected.setIsbn(requestDto.getIsbn());
-        expected.setCoverImage(requestDto.getCoverImage());
+        BookDto expected = createBookDto(
+                bookId,
+                VALID_TITLE,
+                VALID_AUTHOR,
+                VALID_PRICE,
+                VALID_ISBN,
+                VALID_DESCRIPTION,
+                VALID_COVER_IMAGE
+        );
         String jsonRequest = objectMapper.writeValueAsString(requestDto);
 
         MvcResult result = mockMvc.perform(post("/api/books")
@@ -137,6 +159,7 @@ public class BookControllerTest {
         firstBook.setIsbn("1ISBN01");
         firstBook.setDescription("description");
         firstBook.setCoverImage("coverimage");
+        firstBook.setCategoryIds(Collections.emptySet());
         BookDto secondBook = new BookDto();
         secondBook.setId(2L);
         secondBook.setAuthor("Second Author");
@@ -145,6 +168,7 @@ public class BookControllerTest {
         secondBook.setIsbn("2ISBN02");
         secondBook.setDescription("description");
         secondBook.setCoverImage("coverimage");
+        secondBook.setCategoryIds(Collections.emptySet());
         BookDto thirdBook = new BookDto();
         thirdBook.setId(3L);
         thirdBook.setAuthor("Third Author");
@@ -153,6 +177,8 @@ public class BookControllerTest {
         thirdBook.setIsbn("3ISBN03");
         thirdBook.setDescription("description");
         thirdBook.setCoverImage("coverimage");
+        thirdBook.setCategoryIds(Collections.emptySet());
+
         List<BookDto> expected = new ArrayList<>();
         expected.add(firstBook);
         expected.add(secondBook);
