@@ -1,1 +1,1 @@
-DELETE FROM categories WHERE name = 'Valid Category'
+DELETE FROM categories WHERE id = 4;

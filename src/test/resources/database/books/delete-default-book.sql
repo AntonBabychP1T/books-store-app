@@ -1,1 +1,1 @@
-delete from books where title = 'Valid Title';
+delete from books where id = 4;
