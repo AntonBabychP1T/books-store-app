@@ -34,6 +34,7 @@ public class CategoryController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create a new category", description = "Create a new category")
     @Parameter(name = "name", description = "name of the new category",
             required = true, example = "New name")
@@ -66,12 +67,15 @@ public class CategoryController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping
+    @PutMapping("/{id}")
     @Operation(
             summary = "Update category by id",
             description = "Update specific category by id key"
     )
-    public CategoryDto updateCategory(Long id, CategoryRequestDto requestDto) {
+    public CategoryDto updateCategory(
+            @PathVariable Long id,
+            @RequestBody CategoryRequestDto requestDto
+    ) {
         return categoryService.update(id, requestDto);
     }
 
