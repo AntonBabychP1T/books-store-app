@@ -1,0 +1,1 @@
+INSERT INTO cards_items (shopping_cart_id, book_id, quantity, is_deleted) VALUES (1,4,2,0);
