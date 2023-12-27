@@ -112,7 +112,7 @@ GET /api/orders/{orderId}/items/{orderItemId} - Retrieves a specific item in an 
 
 ## Database structure ##
 
-![Database_Structure.PNG](https://github.com/AntonBabychP1T/books-store-app/blob/add-readme-file/images/database-structure.png)
+![Database_Structure.PNG](https://github.com/AntonBabychP1T/books-store-app/blob/master/images/database-structure.png)
 
 # How to test this application? #
 ## Installing Postman and Importing the API Collection ## 
@@ -133,7 +133,7 @@ Locate the Import Button: In the Postman application, locate the 'Import' button
 
 Click 'Import': Click on the 'Import' button to open the import dialog.
 
-Choose Your File: You can find .json file by [this link](https://github.com/AntonBabychP1T/books-store-app/blob/add-readme-file/images/Book-store-app.postman_collection%20(1).json)
+Choose Your File: You can find .json file by [this link](https://github.com/AntonBabychP1T/books-store-app/blob/master/images/Book-store-app.postman_collection%20(1).json)
 
 File Upload: Drag and drop your .json file into the dialog box or click 'Upload Files' and navigate to where your .json file is stored, then select it.
 
