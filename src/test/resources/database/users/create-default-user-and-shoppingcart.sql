@@ -1,0 +1,2 @@
+INSERT INTO users (email, password, first_name, last_name, shipping_address,is_deleted) VALUES ('test@email.com','Password', 'Default', 'User', 'DefaultAddress',0);
+INSERT INTO shopping_cards (user_id,is_deleted) VALUES (1,0);

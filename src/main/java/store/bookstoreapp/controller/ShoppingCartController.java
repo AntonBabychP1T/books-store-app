@@ -30,6 +30,7 @@ public class ShoppingCartController {
     private final ShoppingCartService shoppingCartService;
 
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Add book to shopping cart",
             description = "Create new cart item with book and quantity")
     @Parameter(name = "bookId", description = "id of the book",
