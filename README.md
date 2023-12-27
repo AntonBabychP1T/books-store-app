@@ -1,4 +1,4 @@
-![Main Info](https://github.com/AntonBabychP1T/books-store-app/blob/add-readme-file/images/main.png)
+![Main Info](https://github.com/AntonBabychP1T/books-store-app/blob/master/images/main.png)
 # Book Store App
 ## API Endpoints
 ### Authentication Controller
