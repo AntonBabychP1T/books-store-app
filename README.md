@@ -1,4 +1,4 @@
-![Main-Infp-PNG](Images%Main.PNG)
+![Main-Infp-PNG](images%main.PNG](https://github.com/AntonBabychP1T/books-store-app/blob/add-readme-file/images/main.png)
 ### Book Store App
 ##API Endpoints
 #Authentication Controller
